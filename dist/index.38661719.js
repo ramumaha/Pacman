@@ -463,6 +463,8 @@ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 var _setup = require("./setup");
 var _gameBoard = require("./GameBoard");
 var _gameBoardDefault = parcelHelpers.interopDefault(_gameBoard);
+var _pacman = require("./Pacman");
+var _pacmanDefault = parcelHelpers.interopDefault(_pacman);
 //Dom elements
 const gameGrid = document.querySelector('#game');
 const scoreTable = document.querySelector('#score');
@@ -484,9 +486,23 @@ function checkCollision(pacman, ghost) {
 function gameLoop(pacman, Ghost) {
 }
 function startGame() {
+    gameWin = false;
+    powerPillActive = false;
+    score = 0;
+    startButton.classList.add('hide');
+    gameBoard.createGrid(_setup.LEVEL);
+    const pacman = new _pacmanDefault.default(2, 287);
+    gameBoard.addObject(287, [
+        _setup.OBJECT_TYPE.PACMAN
+    ]);
+    document.addEventListener('keydown', (e)=>{
+        pacman.handleKeyInput(e, gameBoard.objectExist.bind(gameBoard));
+    });
 }
+//initialise game
+startButton.addEventListener('click', startGame);
 
-},{"./setup":"dE4bu","./GameBoard":"6OCrM","@parcel/transformer-js/src/esmodule-helpers.js":"ciiiV"}],"dE4bu":[function(require,module,exports) {
+},{"./setup":"dE4bu","./GameBoard":"6OCrM","@parcel/transformer-js/src/esmodule-helpers.js":"ciiiV","./Pacman":"1ZDZy"}],"dE4bu":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "GRID_SIZE", ()=>GRID_SIZE
@@ -1096,6 +1112,61 @@ class GameBoard {
     }
 }
 exports.default = GameBoard;
+
+},{"./setup":"dE4bu","@parcel/transformer-js/src/esmodule-helpers.js":"ciiiV"}],"1ZDZy":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+var _setup = require("./setup");
+class Pacman {
+    constructor(speed, startPos){
+        this.pos = startPos;
+        this.speed = speed;
+        this.dir = null;
+        this.timer = 0;
+        this.powerPill = false;
+        this.rotation = true;
+    }
+    shouldMove() {
+        if (!this.dir) return false;
+        if (this.timer === this.speed) {
+            this.timer = 0;
+            return true;
+        }
+        this.timer++;
+    }
+    getNextMove(objectExist) {
+        let nextMovePos = this.pos + this.dir.movement;
+        if (objectExist(nextMovePos, _setup.OBJECT_TYPE.WALL) || objectExist(nextMovePos.OBJECT_TYPE.GHOSTLAIR)) nextMovePos = this.pos;
+        return {
+            nextMovePos,
+            direction: this.dir
+        };
+    }
+    makeMove() {
+        const classesToRemove = [
+            _setup.OBJECT_TYPE.PACMAN
+        ];
+        const classesToAdd = [
+            _setup.OBJECT_TYPE.PACMAN
+        ];
+        return {
+            classesToRemove,
+            classesToAdd
+        };
+    }
+    setNextPos(nextMovePos) {
+        this.pos = nextMovePos;
+    }
+    handleKeyInput(e, objectExist1) {
+        let dir;
+        if (e.keyCode >= 37 && e.keyCode <= 40) dir = _setup.DIRECTIONS[e.key];
+        else return;
+        const nextMovePos = this.pos + dir.movement;
+        if (objectExist1(nextMovePos, _setup.OBJECT_TYPE.WALL)) return;
+        this.dir = dir;
+    }
+}
+exports.default = Pacman;
 
 },{"./setup":"dE4bu","@parcel/transformer-js/src/esmodule-helpers.js":"ciiiV"}]},["5UGAA","7BQdY"], "7BQdY", "parcelRequire484f")
 
