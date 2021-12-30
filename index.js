@@ -1,18 +1,38 @@
-const btnPlay=document.querySelector('#play');
-const btnHighScore=document.querySelector('#highScore');
+import { LEVEL,OBJECT_TYPE } from "./setup";
 
-startGame=function(){
-   const response=confirm('Are you ready to play!');
-   if(response){
-       console.log('Game on');
-      location.assign('game.html');
-   }else{
-       console.log('terminated');
-   }
+import GameBoard from './GameBoard';
+
+//Dom elements
+
+const gameGrid=document.querySelector('#game');
+const scoreTable=document.querySelector('#score');
+const startButton=document.querySelector('#start-button');
+
+//Const
+const POWER_PILL_TIME=10000;
+const GLOBAL_SPEED=80;
+const gameBoard=GameBoard.createGameBoard(gameGrid,LEVEL);
+
+//intial
+
+let score=0;
+let timer=null;
+let gameWin=false;
+let powerPillActive=false;
+let powerPillTime=null;
+
+function gameOver(pacman,grid){
+
 }
 
+function checkCollision(pacman,ghost){
 
-btnPlay.addEventListener('click',startGame);
-btnHighScore.addEventListener('click',function(){
-    location.assign('highScore.html');
-})
+}
+
+function gameLoop(pacman,Ghost){
+
+}
+
+function startGame(){
+
+}
