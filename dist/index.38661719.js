@@ -465,25 +465,24 @@ var _gameBoard = require("./GameBoard");
 var _gameBoardDefault = parcelHelpers.interopDefault(_gameBoard);
 var _pacman = require("./Pacman");
 var _pacmanDefault = parcelHelpers.interopDefault(_pacman);
-//Dom elements
-const gameGrid = document.querySelector('#game');
-const scoreTable = document.querySelector('#score');
+const GameGrid = document.querySelector('#game');
+const ScoreTable = document.querySelector('#score');
 const startButton = document.querySelector('#start-button');
-//Const
 const POWER_PILL_TIME = 10000;
 const GLOBAL_SPEED = 80;
-const gameBoard = _gameBoardDefault.default.createGameBoard(gameGrid, _setup.LEVEL);
-//intial
+const gameBoard = _gameBoardDefault.default.createGameBoard(GameGrid, _setup.LEVEL);
 let score = 0;
 let timer = null;
 let gameWin = false;
 let powerPillActive = false;
-let powerPillTime = null;
+let powerPillTimer = null;
 function gameOver(pacman, grid) {
 }
-function checkCollision(pacman, ghost) {
+function checkCollision(pacman, ghosts) {
 }
-function gameLoop(pacman, Ghost) {
+function gameloop(pacman, ghosts) {
+}
+function gameOver(pacman, grid) {
 }
 function startGame() {
     gameWin = false;
@@ -496,10 +495,9 @@ function startGame() {
         _setup.OBJECT_TYPE.PACMAN
     ]);
     document.addEventListener('keydown', (e)=>{
-        pacman.handleKeyInput(e, gameBoard.objectExist.bind(gameBoard));
+        pacman.handleKeyInput(e, gameBoard.objectExists);
     });
 }
-//initialise game
 startButton.addEventListener('click', startGame);
 
 },{"./setup":"dE4bu","./GameBoard":"6OCrM","@parcel/transformer-js/src/esmodule-helpers.js":"ciiiV","./Pacman":"1ZDZy"}],"dE4bu":[function(require,module,exports) {
@@ -565,7 +563,7 @@ const CLASS_LIST = [
     OBJECT_TYPE.CLYDE,
     OBJECT_TYPE.PILL,
     OBJECT_TYPE.PACMAN,
-    OBJECT_TYPE.GHOSTLAIR
+    OBJECT_TYPE.GHOSTLAIR, 
 ];
 const LEVEL = [
     1,
@@ -1071,25 +1069,22 @@ class GameBoard {
         this.DOMGrid = DOMGrid;
     }
     showGameStatus(gameWin) {
-        // Create and show game win or game over
         const div = document.createElement('div');
         div.classList.add('game-status');
-        div.innerHTML = `${gameWin ? 'WIN!' : 'GAME OVER!'}`;
+        div.innerHTML = `${gameWin ? 'WIN!' : 'GAMEOVER'}`;
         this.DOMGrid.appendChild(div);
     }
     createGrid(level) {
         this.dotCount = 0;
         this.grid = [];
         this.DOMGrid.innerHTML = '';
-        // First set correct amount of columns based on Grid Size and Cell Size
-        this.DOMGrid.style.cssText = `grid-template-columns: repeat(${_setup.GRID_SIZE}, ${_setup.CELL_SIZE}px);`;
-        level.forEach((square)=>{
+        this.DOMGrid.style.cssText = `grid-template-columns: repeat(${_setup.GRID_SIZE},${_setup.CELL_SIZE}px)`;
+        level.forEach((square, i)=>{
             const div = document.createElement('div');
             div.classList.add('square', _setup.CLASS_LIST[square]);
             div.style.cssText = `width: ${_setup.CELL_SIZE}px; height: ${_setup.CELL_SIZE}px;`;
             this.DOMGrid.appendChild(div);
             this.grid.push(div);
-            // Add dots
             if (_setup.CLASS_LIST[square] === _setup.OBJECT_TYPE.DOT) this.dotCount++;
         });
     }
@@ -1099,11 +1094,11 @@ class GameBoard {
     removeObject(pos1, classes1) {
         this.grid[pos1].classList.remove(...classes1);
     }
-    objectExist(pos2, object) {
-        return this.grid[pos2].classList.contains(object);
-    }
-    rotateDiv(pos3, deg) {
-        this.grid[pos3].style.transform = `rotate(${deg}deg)`;
+    objectExists = (pos, object)=>{
+        return this.grid[pos].classList.contains(object);
+    };
+    rotateDiv(pos2, deg) {
+        this.grid[pos2].style.transform = `rotate(${deg}deg)`;
     }
     static createGameBoard(DOMGrid1, level1) {
         const board = new this(DOMGrid1);
@@ -1134,9 +1129,9 @@ class Pacman {
         }
         this.timer++;
     }
-    getNextMove(objectExist) {
+    getNextMove(objectExists) {
         let nextMovePos = this.pos + this.dir.movement;
-        if (objectExist(nextMovePos, _setup.OBJECT_TYPE.WALL) || objectExist(nextMovePos.OBJECT_TYPE.GHOSTLAIR)) nextMovePos = this.pos;
+        if (objectExists(nextMovePos, _setup.OBJECT_TYPE.WALL) || objectExists(nextMovePos, _setup.OBJECT_TYPE.GHOST)) nextMovePos = this.pos;
         return {
             nextMovePos,
             direction: this.dir
@@ -1154,15 +1149,16 @@ class Pacman {
             classesToAdd
         };
     }
-    setNextPos(nextMovePos) {
+    setNewPos(nextMovePos) {
         this.pos = nextMovePos;
     }
-    handleKeyInput(e, objectExist1) {
+    handleKeyInput(e, objectExists1) {
+        console.log('key pressed');
         let dir;
         if (e.keyCode >= 37 && e.keyCode <= 40) dir = _setup.DIRECTIONS[e.key];
         else return;
         const nextMovePos = this.pos + dir.movement;
-        if (objectExist1(nextMovePos, _setup.OBJECT_TYPE.WALL)) return;
+        if (objectExists1(nextMovePos, _setup.OBJECT_TYPE.WALL)) return;
         this.dir = dir;
     }
 }

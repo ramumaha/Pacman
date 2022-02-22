@@ -9,7 +9,7 @@ class Pacman{
         this.powerPill=false;
         this.rotation=true;
     }
-    
+
     shouldMove(){
         if(!this.dir)return false;
         if(this.timer===this.speed){
@@ -19,35 +19,38 @@ class Pacman{
         this.timer++;
     }
 
-    getNextMove(objectExist){
+    getNextMove(objectExists){
         let nextMovePos=this.pos+this.dir.movement;
-        if(objectExist(nextMovePos,OBJECT_TYPE.WALL) ||objectExist(nextMovePos.OBJECT_TYPE.GHOSTLAIR)){
+
+        if(objectExists(nextMovePos,OBJECT_TYPE.WALL)||objectExists(nextMovePos,OBJECT_TYPE.GHOST)){
             nextMovePos=this.pos;
         }
         return {nextMovePos,direction:this.dir};
-
     }
 
     makeMove(){
         const classesToRemove=[OBJECT_TYPE.PACMAN];
         const classesToAdd=[OBJECT_TYPE.PACMAN];
-        return{classesToRemove,classesToAdd};
+
+        return {classesToRemove,classesToAdd};
     }
 
-    setNextPos(nextMovePos){
+    setNewPos(nextMovePos){
         this.pos=nextMovePos;
     }
-
-    handleKeyInput(e,objectExist){
+    handleKeyInput(e,objectExists){
+        console.log('key pressed');
         let dir;
+
         if(e.keyCode>=37 && e.keyCode<=40){
             dir=DIRECTIONS[e.key];
-            
+
         }else{
             return;
         }
+
         const nextMovePos=this.pos+dir.movement;
-        if(objectExist(nextMovePos,OBJECT_TYPE.WALL))return;
+        if(objectExists(nextMovePos,OBJECT_TYPE.WALL))return;
         this.dir=dir;
     }
 }
