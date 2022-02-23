@@ -88,6 +88,7 @@ body {
   position: relative;
   border-radius: 10px 10px 2px 2px;
   border: none;
+  background:green;
 }
 
 .ghost::before {
@@ -129,8 +130,8 @@ body {
 }
 
 .inky {
-  background: cyan;
-}
+   background: green; 
+} 
 
 .clyde {
   background: orange;

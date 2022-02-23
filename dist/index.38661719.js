@@ -461,10 +461,13 @@ function hmrAcceptRun(bundle, id) {
 },{}],"7BQdY":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 var _setup = require("./setup");
+var _ghostMovs = require("./GhostMovs");
 var _gameBoard = require("./GameBoard");
 var _gameBoardDefault = parcelHelpers.interopDefault(_gameBoard);
 var _pacman = require("./Pacman");
 var _pacmanDefault = parcelHelpers.interopDefault(_pacman);
+var _ghost = require("./Ghost");
+var _ghostDefault = parcelHelpers.interopDefault(_ghost);
 const GameGrid = document.querySelector('#game');
 const ScoreTable = document.querySelector('#score');
 const startButton = document.querySelector('#start-button');
@@ -480,7 +483,11 @@ function gameOver(pacman, grid) {
 }
 function checkCollision(pacman, ghosts) {
 }
-function gameloop(pacman, ghosts) {
+function gameLoop(pacman, ghosts) {
+    gameBoard.moveCharacter(pacman);
+    ghosts.forEach((ghost)=>{
+        gameBoard.moveCharacter(ghost);
+    });
 }
 function gameOver(pacman, grid) {
 }
@@ -497,10 +504,18 @@ function startGame() {
     document.addEventListener('keydown', (e)=>{
         pacman.handleKeyInput(e, gameBoard.objectExists);
     });
+    const ghosts = [
+        new _ghostDefault.default(5, 188, _ghostMovs.randomMovement, _setup.OBJECT_TYPE.BLINKY),
+        new _ghostDefault.default(4, 209, _ghostMovs.randomMovement, _setup.OBJECT_TYPE.PINKY),
+        new _ghostDefault.default(3, 230, _ghostMovs.randomMovement, _setup.OBJECT_TYPE.INKY),
+        new _ghostDefault.default(2, 251, _ghostMovs.randomMovement, _setup.OBJECT_TYPE.CLYDE), 
+    ];
+    timer = setInterval(()=>gameLoop(pacman, ghosts)
+    , GLOBAL_SPEED);
 }
 startButton.addEventListener('click', startGame);
 
-},{"./setup":"dE4bu","./GameBoard":"6OCrM","@parcel/transformer-js/src/esmodule-helpers.js":"ciiiV","./Pacman":"1ZDZy"}],"dE4bu":[function(require,module,exports) {
+},{"./setup":"dE4bu","./GameBoard":"6OCrM","./Pacman":"1ZDZy","@parcel/transformer-js/src/esmodule-helpers.js":"ciiiV","./GhostMovs":"5ncFS","./Ghost":"ePfLU"}],"dE4bu":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "GRID_SIZE", ()=>GRID_SIZE
@@ -563,7 +578,7 @@ const CLASS_LIST = [
     OBJECT_TYPE.CLYDE,
     OBJECT_TYPE.PILL,
     OBJECT_TYPE.PACMAN,
-    OBJECT_TYPE.GHOSTLAIR, 
+    OBJECT_TYPE.GHOSTLAIR
 ];
 const LEVEL = [
     1,
@@ -1100,6 +1115,19 @@ class GameBoard {
     rotateDiv(pos2, deg) {
         this.grid[pos2].style.transform = `rotate(${deg}deg)`;
     }
+    moveCharacter(character) {
+        if (character.shouldMove()) {
+            const { nextMovePos , direction  } = character.getNextMove(this.objectExists);
+            const { classesToRemove , classesToAdd  } = character.makeMove();
+            if (character.rotation && nextMovePos !== character.pos) {
+                this.rotateDiv(nextMovePos, character.dir.rotation);
+                this.rotateDiv(character.pos, 0);
+            }
+            this.removeObject(character.pos, classesToRemove);
+            this.addObject(nextMovePos, classesToAdd);
+            character.setNewPos(nextMovePos, direction);
+        }
+    }
     static createGameBoard(DOMGrid1, level1) {
         const board = new this(DOMGrid1);
         board.createGrid(level1);
@@ -1153,16 +1181,97 @@ class Pacman {
         this.pos = nextMovePos;
     }
     handleKeyInput(e, objectExists1) {
-        console.log('key pressed');
         let dir;
         if (e.keyCode >= 37 && e.keyCode <= 40) dir = _setup.DIRECTIONS[e.key];
         else return;
         const nextMovePos = this.pos + dir.movement;
-        if (objectExists1(nextMovePos, _setup.OBJECT_TYPE.WALL)) return;
+        if (objectExists1(nextMovePos, _setup.OBJECT_TYPE.WALL) || objectExists1(nextMovePos, _setup.OBJECT_TYPE.GHOSTLAIR)) return;
         this.dir = dir;
     }
 }
 exports.default = Pacman;
+
+},{"./setup":"dE4bu","@parcel/transformer-js/src/esmodule-helpers.js":"ciiiV"}],"5ncFS":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+//Primitive random movement ..will be changed later
+parcelHelpers.export(exports, "randomMovement", ()=>randomMovement
+);
+var _setup = require("./setup");
+function randomMovement(pos, direction, objectExists) {
+    let dir = direction;
+    let nextMovePos = pos + dir.movement;
+    //create an array from the direction object keys
+    const keys = Object.keys(_setup.DIRECTIONS);
+    while(objectExists(nextMovePos, _setup.OBJECT_TYPE.WALL) || objectExists(nextMovePos, _setup.OBJECT_TYPE.GHOST)){
+        const key = keys[Math.floor(Math.random() * keys.length)];
+        //set nextmov
+        dir = _setup.DIRECTIONS[key];
+        //set next mov
+        nextMovePos = pos + dir.movement;
+    }
+    return {
+        nextMovePos,
+        direction: dir
+    };
+}
+
+},{"./setup":"dE4bu","@parcel/transformer-js/src/esmodule-helpers.js":"ciiiV"}],"ePfLU":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+var _setup = require("./setup");
+class Ghost {
+    constructor(speed = 5, startPos, movement, name){
+        this.name = name;
+        this.movement = movement;
+        this.startPos = startPos; //when pacman eats ghost
+        this.pos = startPos;
+        this.dir = _setup.DIRECTIONS.ArrowRight;
+        this.speed = speed;
+        this.timer = 0;
+        this.isScared = false; //powerpill
+        this.rotation = false; //ghost cant rotate
+    }
+    shouldMove() {
+        if (this.timer === this.speed) {
+            this.timer = 0;
+            return true;
+        }
+        this.timer++;
+        return false;
+    }
+    getNextMove(objectExists) {
+        const { nextMovePos , direction  } = this.movement(this.pos, this.dir, objectExists);
+        return {
+            nextMovePos,
+            direction
+        };
+    }
+    makeMove() {
+        const classesToRemove = [
+            _setup.OBJECT_TYPE.GHOST,
+            _setup.OBJECT_TYPE.SCARED,
+            this.name
+        ];
+        let classesToAdd = [
+            _setup.OBJECT_TYPE.GHOST,
+            this.name
+        ];
+        if (this.isScared) classesToAdd = [
+            ...classesToAdd,
+            _setup.OBJECT_TYPE.SCARED
+        ];
+        return {
+            classesToRemove,
+            classesToAdd
+        };
+    }
+    setNewPos(nextMovePos, direction) {
+        this.pos = nextMovePos;
+        this.dir = direction;
+    }
+}
+exports.default = Ghost;
 
 },{"./setup":"dE4bu","@parcel/transformer-js/src/esmodule-helpers.js":"ciiiV"}]},["5UGAA","7BQdY"], "7BQdY", "parcelRequire484f")
 
