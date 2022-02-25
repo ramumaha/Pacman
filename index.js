@@ -23,22 +23,35 @@ let powerPillActive=false;
 let powerPillTimer=null;
 
 function gameOver(pacman,grid){
-
+    document.removeEventListener('keydown',(e)=>pacman.handleKeyInput(e,gameBoard.objectExists))
+    gameBoard.showGameStatus(gameWin);
+    clearInterval(timer);
+    startButton.classList.remove('hide');
 }
 
 function checkCollision(pacman,ghosts){
+    const collidedGhost=ghosts.find(ghost=>pacman.pos===ghost.pos);
+    if(collidedGhost){
+        if(pacman.powerPill){
+            gameBoard.removeObject(collidedGhost.pos,[OBJECT_TYPE.GHOST,OBJECT_TYPE.SCARED,collidedGhost.name]);
+            collidedGhost.pos=collidedGhost.startPos;
+            score+=100;
+        }else{
+            gameBoard.removeObject(pacman.pos,[ OBJECT_TYPE.PACMAN]);
+            gameBoard.rotateDiv(pacman.pos,0);
+            gameOver(pacman,GameGrid);
+
+        }
+    }
 
 }
 
 function gameLoop(pacman,ghosts){
     gameBoard.moveCharacter(pacman);
+    checkCollision(pacman,ghosts);
     ghosts.forEach(ghost => {
         gameBoard.moveCharacter(ghost);});
-
-}
-
-function gameOver(pacman,grid){
-
+    checkCollision(pacman,ghosts);
 }
 
 function startGame(){
@@ -57,7 +70,7 @@ function startGame(){
 
     const ghosts=[
         new Ghost(5,188,randomMovement,OBJECT_TYPE.BLINKY),
-        new Ghost(4,209,randomMovement,OBJECT_TYPE.PINKY),
+        new Ghost(4,Pacman.pos,randomMovement,OBJECT_TYPE.PINKY),
         new Ghost(3,230,randomMovement,OBJECT_TYPE.INKY),
         new Ghost(2,251,randomMovement,OBJECT_TYPE.CLYDE),
     ]

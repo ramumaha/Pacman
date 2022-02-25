@@ -480,16 +480,40 @@ let gameWin = false;
 let powerPillActive = false;
 let powerPillTimer = null;
 function gameOver(pacman, grid) {
+    document.removeEventListener('keydown', (e)=>pacman.handleKeyInput(e, gameBoard.objectExists)
+    );
+    gameBoard.showGameStatus(gameWin);
+    clearInterval(timer);
+    startButton.classList.remove('hide');
 }
 function checkCollision(pacman, ghosts) {
+    const collidedGhost = ghosts.find((ghost)=>pacman.pos === ghost.pos
+    );
+    if (collidedGhost) {
+        if (pacman.powerPill) {
+            gameBoard.removeObject(collidedGhost.pos, [
+                _setup.OBJECT_TYPE.GHOST,
+                _setup.OBJECT_TYPE.SCARED,
+                collidedGhost.name
+            ]);
+            collidedGhost.pos = collidedGhost.startPos;
+            score += 100;
+        } else {
+            gameBoard.removeObject(pacman.pos, [
+                _setup.OBJECT_TYPE.PACMAN
+            ]);
+            gameBoard.rotateDiv(pacman.pos, 0);
+            gameOver(pacman, GameGrid);
+        }
+    }
 }
 function gameLoop(pacman, ghosts) {
     gameBoard.moveCharacter(pacman);
+    checkCollision(pacman, ghosts);
     ghosts.forEach((ghost)=>{
         gameBoard.moveCharacter(ghost);
     });
-}
-function gameOver(pacman, grid) {
+    checkCollision(pacman, ghosts);
 }
 function startGame() {
     gameWin = false;
@@ -506,7 +530,7 @@ function startGame() {
     });
     const ghosts = [
         new _ghostDefault.default(5, 188, _ghostMovs.randomMovement, _setup.OBJECT_TYPE.BLINKY),
-        new _ghostDefault.default(4, 209, _ghostMovs.randomMovement, _setup.OBJECT_TYPE.PINKY),
+        new _ghostDefault.default(4, _pacmanDefault.default.pos, _ghostMovs.randomMovement, _setup.OBJECT_TYPE.PINKY),
         new _ghostDefault.default(3, 230, _ghostMovs.randomMovement, _setup.OBJECT_TYPE.INKY),
         new _ghostDefault.default(2, 251, _ghostMovs.randomMovement, _setup.OBJECT_TYPE.CLYDE), 
     ];
@@ -1197,6 +1221,12 @@ parcelHelpers.defineInteropFlag(exports);
 //Primitive random movement ..will be changed later
 parcelHelpers.export(exports, "randomMovement", ()=>randomMovement
 );
+parcelHelpers.export(exports, "a_Search", ()=>a_Search
+);
+parcelHelpers.export(exports, "patrol_move", ()=>patrol_move
+);
+parcelHelpers.export(exports, "scatter", ()=>scatter
+);
 var _setup = require("./setup");
 function randomMovement(pos, direction, objectExists) {
     let dir = direction;
@@ -1214,6 +1244,13 @@ function randomMovement(pos, direction, objectExists) {
         nextMovePos,
         direction: dir
     };
+}
+function a_Search(pos, direction, objectExists, pacman) {
+}
+function patrol_move() {
+}
+function scatter(ghost) {
+    _setup.OBJECT_TYPE.BLINKY;
 }
 
 },{"./setup":"dE4bu","@parcel/transformer-js/src/esmodule-helpers.js":"ciiiV"}],"ePfLU":[function(require,module,exports) {

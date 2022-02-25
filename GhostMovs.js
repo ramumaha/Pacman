@@ -21,3 +21,22 @@ export function randomMovement(pos,direction,objectExists){
 
 
 }
+
+export function a_Search(pos,direction,objectExists,pacman){
+
+}
+
+
+export function patrol_move(){
+
+
+}
+
+
+export function scatter(ghost){
+    if(ghost==OBJECT_TYPE.BLINKY){
+
+    }
+
+
+}
