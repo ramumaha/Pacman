@@ -1,7 +1,7 @@
 import { DIRECTIONS,OBJECT_TYPE } from "./setup";
 
 class Ghost{
-    constructor(speed=5,startPos,movement,name){
+    constructor(speed=5,startPos,movement,name,behaviour="chase"){
         this.name=name;
         this.movement=movement;
         this.startPos=startPos; //when pacman eats ghost
@@ -11,6 +11,7 @@ class Ghost{
         this.timer=0;
         this.isScared=false; //powerpill
         this.rotation=false; //ghost cant rotate
+        this.behaviour=this.behaviour
     }
     shouldMove(){
         if(this.timer===this.speed){

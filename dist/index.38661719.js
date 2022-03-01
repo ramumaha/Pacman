@@ -530,7 +530,7 @@ function startGame() {
     });
     const ghosts = [
         new _ghostDefault.default(5, 188, _ghostMovs.randomMovement, _setup.OBJECT_TYPE.BLINKY),
-        new _ghostDefault.default(4, _pacmanDefault.default.pos, _ghostMovs.randomMovement, _setup.OBJECT_TYPE.PINKY),
+        new _ghostDefault.default(4, pacman.pos + 40, _ghostMovs.suddenAppear, _setup.OBJECT_TYPE.PINKY),
         new _ghostDefault.default(3, 230, _ghostMovs.randomMovement, _setup.OBJECT_TYPE.INKY),
         new _ghostDefault.default(2, 251, _ghostMovs.randomMovement, _setup.OBJECT_TYPE.CLYDE), 
     ];
@@ -553,6 +553,8 @@ parcelHelpers.export(exports, "OBJECT_TYPE", ()=>OBJECT_TYPE
 parcelHelpers.export(exports, "CLASS_LIST", ()=>CLASS_LIST
 );
 parcelHelpers.export(exports, "LEVEL", ()=>LEVEL
+);
+parcelHelpers.export(exports, "PINKYMOVES", ()=>PINKYMOVES
 );
 const GRID_SIZE = 20;
 const CELL_SIZE = 20;
@@ -1066,6 +1068,10 @@ const LEVEL = [
     1,
     1, 
 ];
+const PINKYMOVES = [
+    40,
+    -40
+];
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"ciiiV"}],"ciiiV":[function(require,module,exports) {
 exports.interopDefault = function(a) {
@@ -1219,9 +1225,11 @@ exports.default = Pacman;
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 //Primitive random movement ..will be changed later
+// export const pinky_DOM=document.querySelector('.pinky');
+// console.log(pinky_DOM);
 parcelHelpers.export(exports, "randomMovement", ()=>randomMovement
 );
-parcelHelpers.export(exports, "a_Search", ()=>a_Search
+parcelHelpers.export(exports, "suddenAppear", ()=>suddenAppear
 );
 parcelHelpers.export(exports, "patrol_move", ()=>patrol_move
 );
@@ -1245,7 +1253,22 @@ function randomMovement(pos, direction, objectExists) {
         direction: dir
     };
 }
-function a_Search(pos, direction, objectExists, pacman) {
+function suddenAppear(pos, direction, objectExists) {
+    let dir = direction;
+    let nextMovePos = pos + dir.movement + 40;
+    //create an array from the direction object keys
+    const keys = Object.keys(_setup.DIRECTIONS);
+    while(objectExists(nextMovePos, _setup.OBJECT_TYPE.WALL) || objectExists(nextMovePos, _setup.OBJECT_TYPE.GHOST) || objectExists(nextMovePos, _setup.OBJECT_TYPE.BLANK) || pos < 0 || pos >= 418 || nextMovePos < 0 || nextMovePos >= 400){
+        const key = keys[Math.floor(Math.random() * keys.length)];
+        const drift = _setup.PINKYMOVES[Math.floor(Math.random() * _setup.PINKYMOVES.length)];
+        //set nextmov
+        dir = _setup.DIRECTIONS[key];
+        nextMovePos = (pos + dir.movement + drift) % 400;
+    }
+    return {
+        nextMovePos,
+        direction: dir
+    };
 }
 function patrol_move() {
 }
@@ -1258,7 +1281,7 @@ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _setup = require("./setup");
 class Ghost {
-    constructor(speed = 5, startPos, movement, name){
+    constructor(speed = 5, startPos, movement, name, behaviour = "chase"){
         this.name = name;
         this.movement = movement;
         this.startPos = startPos; //when pacman eats ghost
@@ -1268,6 +1291,7 @@ class Ghost {
         this.timer = 0;
         this.isScared = false; //powerpill
         this.rotation = false; //ghost cant rotate
+        this.behaviour = this.behaviour;
     }
     shouldMove() {
         if (this.timer === this.speed) {

@@ -1,5 +1,5 @@
 import {LEVEL,OBJECT_TYPE} from './setup';
-import { randomMovement } from './GhostMovs';
+import { randomMovement,suddenAppear } from './GhostMovs';
 
 import GameBoard from './GameBoard';
 import Pacman from './Pacman';
@@ -70,9 +70,9 @@ function startGame(){
 
     const ghosts=[
         new Ghost(5,188,randomMovement,OBJECT_TYPE.BLINKY),
-        new Ghost(4,Pacman.pos,randomMovement,OBJECT_TYPE.PINKY),
+        new Ghost(4,pacman.pos+40,suddenAppear,OBJECT_TYPE.PINKY),
         new Ghost(3,230,randomMovement,OBJECT_TYPE.INKY),
-        new Ghost(2,251,randomMovement,OBJECT_TYPE.CLYDE),
+        new Ghost(2,251,randomMovement,OBJECT_TYPE.CLYDE,),
     ]
 
 

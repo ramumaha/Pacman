@@ -1,7 +1,10 @@
-import { DIRECTIONS,OBJECT_TYPE } from "./setup";
+import { DIRECTIONS,OBJECT_TYPE,PINKYMOVES } from "./setup";
 
 //Primitive random movement ..will be changed later
 
+
+// export const pinky_DOM=document.querySelector('.pinky');
+// console.log(pinky_DOM);
 export function randomMovement(pos,direction,objectExists){
     let dir=direction;
     let nextMovePos=pos+dir.movement;
@@ -11,7 +14,6 @@ export function randomMovement(pos,direction,objectExists){
 
     while(objectExists(nextMovePos,OBJECT_TYPE.WALL) || objectExists(nextMovePos,OBJECT_TYPE.GHOST)){
         const key=keys[Math.floor(Math.random()*keys.length)];
-
         //set nextmov
         dir=DIRECTIONS[key];
         //set next mov
@@ -22,7 +24,22 @@ export function randomMovement(pos,direction,objectExists){
 
 }
 
-export function a_Search(pos,direction,objectExists,pacman){
+export function suddenAppear(pos,direction,objectExists){
+    let dir=direction;
+    let nextMovePos=pos+dir.movement+40;
+
+    //create an array from the direction object keys
+    const keys=Object.keys(DIRECTIONS);
+
+    while(objectExists(nextMovePos,OBJECT_TYPE.WALL) || objectExists(nextMovePos,OBJECT_TYPE.GHOST) ||objectExists(nextMovePos,OBJECT_TYPE.BLANK) || pos<0 || pos>=418 || nextMovePos<0 || nextMovePos>=400){
+        const key=keys[Math.floor(Math.random()*keys.length)];
+        const drift=PINKYMOVES[Math.floor(Math.random()*PINKYMOVES.length)];
+        //set nextmov
+        dir=DIRECTIONS[key];
+        nextMovePos=(pos+dir.movement+drift)%400;
+    }
+    return {nextMovePos,direction:dir};
+
 
 }
 
