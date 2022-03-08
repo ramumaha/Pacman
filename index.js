@@ -1,5 +1,5 @@
 import {LEVEL,OBJECT_TYPE} from './setup';
-import { randomMovement,suddenAppear } from './GhostMovs';
+import { randomMovement,TrackPacman } from './GhostMovs';
 
 import GameBoard from './GameBoard';
 import Pacman from './Pacman';
@@ -48,10 +48,13 @@ function checkCollision(pacman,ghosts){
 
 function gameLoop(pacman,ghosts){
     gameBoard.moveCharacter(pacman);
+    pacman.currentPos();
     checkCollision(pacman,ghosts);
     ghosts.forEach(ghost => {
-        gameBoard.moveCharacter(ghost);});
+        
+        gameBoard.moveCharacter(ghost,pacman.currentPos());});
     checkCollision(pacman,ghosts);
+    
 }
 
 function startGame(){
@@ -62,17 +65,18 @@ function startGame(){
 
     gameBoard.createGrid(LEVEL);
 
-    const pacman=new Pacman(2,287);
+   const pacman=new Pacman(2,287);
     gameBoard.addObject(287,[OBJECT_TYPE.PACMAN]);
     document.addEventListener('keydown',(e)=>{
         pacman.handleKeyInput(e,gameBoard.objectExists);
     })
-
+    // let pinkyPos=pacman.pos+40;
+    
     const ghosts=[
         new Ghost(5,188,randomMovement,OBJECT_TYPE.BLINKY),
-        new Ghost(4,pacman.pos+40,suddenAppear,OBJECT_TYPE.PINKY),
+        new Ghost(4,200,TrackPacman,OBJECT_TYPE.PINKY),
         new Ghost(3,230,randomMovement,OBJECT_TYPE.INKY),
-        new Ghost(2,251,randomMovement,OBJECT_TYPE.CLYDE,),
+        new Ghost(2,251,randomMovement,OBJECT_TYPE.CLYDE),
     ]
 
 
@@ -80,3 +84,4 @@ function startGame(){
     timer=setInterval(()=>gameLoop(pacman,ghosts),GLOBAL_SPEED);
 }
 startButton.addEventListener('click',startGame);
+

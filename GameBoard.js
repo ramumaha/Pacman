@@ -48,10 +48,10 @@ class GameBoard{
       this.grid[pos].style.transform=`rotate(${deg}deg)`;
     }
 
-    moveCharacter(character){
+    moveCharacter(character,pacmanPos={}){
       if(character.shouldMove()){
         const {nextMovePos,direction}=character.getNextMove(
-          this.objectExists
+          this.objectExists,pacmanPos
         );
         const {classesToRemove,classesToAdd}=character.makeMove();
         if(character.rotation && nextMovePos!==character.pos){
@@ -60,8 +60,6 @@ class GameBoard{
         }
         this.removeObject(character.pos,classesToRemove);
         this.addObject(nextMovePos,classesToAdd);
-
-
         character.setNewPos(nextMovePos,direction);
       }
 

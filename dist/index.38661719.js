@@ -509,9 +509,10 @@ function checkCollision(pacman, ghosts) {
 }
 function gameLoop(pacman, ghosts) {
     gameBoard.moveCharacter(pacman);
+    pacman.currentPos();
     checkCollision(pacman, ghosts);
     ghosts.forEach((ghost)=>{
-        gameBoard.moveCharacter(ghost);
+        gameBoard.moveCharacter(ghost, pacman.currentPos());
     });
     checkCollision(pacman, ghosts);
 }
@@ -528,9 +529,10 @@ function startGame() {
     document.addEventListener('keydown', (e)=>{
         pacman.handleKeyInput(e, gameBoard.objectExists);
     });
+    // let pinkyPos=pacman.pos+40;
     const ghosts = [
         new _ghostDefault.default(5, 188, _ghostMovs.randomMovement, _setup.OBJECT_TYPE.BLINKY),
-        new _ghostDefault.default(4, pacman.pos + 40, _ghostMovs.suddenAppear, _setup.OBJECT_TYPE.PINKY),
+        new _ghostDefault.default(4, 200, _ghostMovs.TrackPacman, _setup.OBJECT_TYPE.PINKY),
         new _ghostDefault.default(3, 230, _ghostMovs.randomMovement, _setup.OBJECT_TYPE.INKY),
         new _ghostDefault.default(2, 251, _ghostMovs.randomMovement, _setup.OBJECT_TYPE.CLYDE), 
     ];
@@ -1145,9 +1147,10 @@ class GameBoard {
     rotateDiv(pos2, deg) {
         this.grid[pos2].style.transform = `rotate(${deg}deg)`;
     }
-    moveCharacter(character) {
+    moveCharacter(character, pacmanPos = {
+    }) {
         if (character.shouldMove()) {
-            const { nextMovePos , direction  } = character.getNextMove(this.objectExists);
+            const { nextMovePos , direction  } = character.getNextMove(this.objectExists, pacmanPos);
             const { classesToRemove , classesToAdd  } = character.makeMove();
             if (character.rotation && nextMovePos !== character.pos) {
                 this.rotateDiv(nextMovePos, character.dir.rotation);
@@ -1218,6 +1221,19 @@ class Pacman {
         if (objectExists1(nextMovePos, _setup.OBJECT_TYPE.WALL) || objectExists1(nextMovePos, _setup.OBJECT_TYPE.GHOSTLAIR)) return;
         this.dir = dir;
     }
+    currentPos() {
+        let ele = document.querySelector('.pacman');
+        let rect = ele.getBoundingClientRect();
+        // for(let key in rect){
+        //     if(typeof rect[key]!=='function'){
+        //         console.log(`${key} ${rect[key]}`);
+        //     }
+        // }
+        return {
+            x: rect['x'],
+            y: rect['y']
+        };
+    }
 }
 exports.default = Pacman;
 
@@ -1225,11 +1241,9 @@ exports.default = Pacman;
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 //Primitive random movement ..will be changed later
-// export const pinky_DOM=document.querySelector('.pinky');
-// console.log(pinky_DOM);
 parcelHelpers.export(exports, "randomMovement", ()=>randomMovement
 );
-parcelHelpers.export(exports, "suddenAppear", ()=>suddenAppear
+parcelHelpers.export(exports, "TrackPacman", ()=>TrackPacman
 );
 parcelHelpers.export(exports, "patrol_move", ()=>patrol_move
 );
@@ -1253,18 +1267,9 @@ function randomMovement(pos, direction, objectExists) {
         direction: dir
     };
 }
-function suddenAppear(pos, direction, objectExists) {
+function TrackPacman(pos, direction, objectExists) {
     let dir = direction;
-    let nextMovePos = pos + dir.movement + 40;
-    //create an array from the direction object keys
-    const keys = Object.keys(_setup.DIRECTIONS);
-    while(objectExists(nextMovePos, _setup.OBJECT_TYPE.WALL) || objectExists(nextMovePos, _setup.OBJECT_TYPE.GHOST) || objectExists(nextMovePos, _setup.OBJECT_TYPE.BLANK) || pos < 0 || pos >= 418 || nextMovePos < 0 || nextMovePos >= 400){
-        const key = keys[Math.floor(Math.random() * keys.length)];
-        const drift = _setup.PINKYMOVES[Math.floor(Math.random() * _setup.PINKYMOVES.length)];
-        //set nextmov
-        dir = _setup.DIRECTIONS[key];
-        nextMovePos = (pos + dir.movement + drift) % 400;
-    }
+    // let nextMovePos=pos+3;
     return {
         nextMovePos,
         direction: dir
@@ -1281,7 +1286,7 @@ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _setup = require("./setup");
 class Ghost {
-    constructor(speed = 5, startPos, movement, name, behaviour = "chase"){
+    constructor(speed = 5, startPos, movement, name){
         this.name = name;
         this.movement = movement;
         this.startPos = startPos; //when pacman eats ghost
@@ -1301,8 +1306,9 @@ class Ghost {
         this.timer++;
         return false;
     }
-    getNextMove(objectExists) {
-        const { nextMovePos , direction  } = this.movement(this.pos, this.dir, objectExists);
+    getNextMove(objectExists, pacmanPos) {
+        console.log(pacmanPos);
+        const { nextMovePos , direction  } = this.movement(this.pos, this.dir, objectExists, pacmanPos);
         return {
             nextMovePos,
             direction

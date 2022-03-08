@@ -1,7 +1,7 @@
 import { DIRECTIONS,OBJECT_TYPE } from "./setup";
 
 class Ghost{
-    constructor(speed=5,startPos,movement,name,behaviour="chase"){
+    constructor(speed=5,startPos,movement,name){
         this.name=name;
         this.movement=movement;
         this.startPos=startPos; //when pacman eats ghost
@@ -22,8 +22,9 @@ class Ghost{
         return false;
     }
 
-    getNextMove(objectExists){
-        const {nextMovePos,direction}=this.movement(this.pos,this.dir,objectExists);
+    getNextMove(objectExists,pacmanPos){
+        console.log(pacmanPos);
+        const {nextMovePos,direction}=this.movement(this.pos,this.dir,objectExists,pacmanPos);
         return {nextMovePos,direction};
     }
 

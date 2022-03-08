@@ -52,6 +52,20 @@ class Pacman{
         if(objectExists(nextMovePos,OBJECT_TYPE.WALL) || objectExists(nextMovePos,OBJECT_TYPE.GHOSTLAIR))return;
         this.dir=dir;
     }
+
+    currentPos(){
+        let ele=document.querySelector('.pacman');
+        let rect=ele.getBoundingClientRect();
+        // for(let key in rect){
+        //     if(typeof rect[key]!=='function'){
+        //         console.log(`${key} ${rect[key]}`);
+        //     }
+
+        // }
+        return {x:rect['x'],y:rect['y']};
+        
+    }
 }
+
 
 export default Pacman;
