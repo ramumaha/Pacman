@@ -469,7 +469,7 @@ var _pacmanDefault = parcelHelpers.interopDefault(_pacman);
 var _ghost = require("./Ghost");
 var _ghostDefault = parcelHelpers.interopDefault(_ghost);
 const GameGrid = document.querySelector('#game');
-const ScoreTable = document.querySelector('#score');
+const scoreTable = document.querySelector('#score');
 const startButton = document.querySelector('#start-button');
 const POWER_PILL_TIME = 10000;
 const GLOBAL_SPEED = 80;
@@ -515,6 +515,38 @@ function gameLoop(pacman, ghosts) {
         gameBoard.moveCharacter(ghost, pacman.currentPos());
     });
     checkCollision(pacman, ghosts);
+    //check if pacman eats dots
+    if (gameBoard.objectExists(pacman.pos, _setup.OBJECT_TYPE.DOT)) {
+        gameBoard.removeObject(pacman.pos, [
+            _setup.OBJECT_TYPE.DOT
+        ]);
+        gameBoard.dotCount--;
+        score += 10;
+    }
+    //check if pacman eats powerpill
+    if (gameBoard.objectExists(pacman.pos, _setup.OBJECT_TYPE.PILL)) {
+        gameBoard.removeObject(pacman.pos, [
+            _setup.OBJECT_TYPE.PILL
+        ]);
+        pacman.powerPill = true;
+        score += 50;
+        clearTimeout(powerPillTimer);
+        powerPillTimer = setTimeout(()=>pacman.powerPill = false
+        , POWER_PILL_TIME);
+        //check if all dots are over
+        if (gameBoard.dotCount === 0) {
+            gameWin = true;
+            gameOver(pacman, ghosts);
+        }
+    }
+    //change ghost
+    if (pacman.powerPill !== powerPillActive) {
+        powerPillActive = pacman.powerPill;
+        ghosts.forEach((ghost)=>ghost.isScared = pacman.powerPill
+        );
+    }
+    //show score
+    scoreTable.innerHTML = score;
 }
 function startGame() {
     gameWin = false;
@@ -532,7 +564,7 @@ function startGame() {
     // let pinkyPos=pacman.pos+40;
     const ghosts = [
         new _ghostDefault.default(5, 188, _ghostMovs.randomMovement, _setup.OBJECT_TYPE.BLINKY),
-        new _ghostDefault.default(4, 200, _ghostMovs.TrackPacman, _setup.OBJECT_TYPE.PINKY),
+        new _ghostDefault.default(4, 400, _ghostMovs.randomMovement, _setup.OBJECT_TYPE.PINKY),
         new _ghostDefault.default(3, 230, _ghostMovs.randomMovement, _setup.OBJECT_TYPE.INKY),
         new _ghostDefault.default(2, 251, _ghostMovs.randomMovement, _setup.OBJECT_TYPE.CLYDE), 
     ];
@@ -1307,7 +1339,7 @@ class Ghost {
         return false;
     }
     getNextMove(objectExists, pacmanPos) {
-        console.log(pacmanPos);
+        // console.log(pacmanPos);
         const { nextMovePos , direction  } = this.movement(this.pos, this.dir, objectExists, pacmanPos);
         return {
             nextMovePos,
