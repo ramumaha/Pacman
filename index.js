@@ -9,7 +9,7 @@ import Ghost from './Ghost';
 
 
 const GameGrid=document.querySelector('#game');
-const scoreTable=document.querySelector('#score');
+const ScoreTable=document.querySelector('#score');
 const startButton=document.querySelector('#start-button');
 
 const POWER_PILL_TIME=10000;
@@ -55,45 +55,6 @@ function gameLoop(pacman,ghosts){
         gameBoard.moveCharacter(ghost,pacman.currentPos());});
     checkCollision(pacman,ghosts);
     
-    //check if pacman eats dots
-    if(gameBoard.objectExists(pacman.pos,OBJECT_TYPE.DOT)){
-        gameBoard.removeObject(pacman.pos,[OBJECT_TYPE.DOT]);
-        gameBoard.dotCount--;
-        score+=10;
-    }
-
-    //check if pacman eats powerpill
-
-    if(gameBoard.objectExists(pacman.pos,OBJECT_TYPE.PILL)){
-        gameBoard.removeObject(pacman.pos,[OBJECT_TYPE.PILL]);
-
-        pacman.powerPill=true;
-        score+=50;
-
-        clearTimeout(powerPillTimer);
-        powerPillTimer=setTimeout(
-            ()=>(pacman.powerPill=false),
-            POWER_PILL_TIME
-        );
-
-        //check if all dots are over
-        if(gameBoard.dotCount===0){
-            gameWin=true;
-            gameOver(pacman,ghosts);
-        }
-
-      
-
-    }
-
-    //change ghost
-    if(pacman.powerPill!==powerPillActive){
-        powerPillActive=pacman.powerPill;
-        ghosts.forEach(ghost=>(ghost.isScared=pacman.powerPill));
-    }
-      //show score
-      scoreTable.innerHTML=score;
-    
 }
 
 function startGame(){
@@ -113,7 +74,7 @@ function startGame(){
     
     const ghosts=[
         new Ghost(5,188,randomMovement,OBJECT_TYPE.BLINKY),
-        new Ghost(4,400,randomMovement,OBJECT_TYPE.PINKY),
+        new Ghost(4,200,TrackPacman,OBJECT_TYPE.PINKY),
         new Ghost(3,230,randomMovement,OBJECT_TYPE.INKY),
         new Ghost(2,251,randomMovement,OBJECT_TYPE.CLYDE),
     ]

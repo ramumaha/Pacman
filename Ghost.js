@@ -23,7 +23,7 @@ class Ghost{
     }
 
     getNextMove(objectExists,pacmanPos){
-        // console.log(pacmanPos);
+        console.log(pacmanPos);
         const {nextMovePos,direction}=this.movement(this.pos,this.dir,objectExists,pacmanPos);
         return {nextMovePos,direction};
     }
